@@ -1,5 +1,5 @@
 import base64
-
+from django.db.models import F
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.shortcuts import get_object_or_404
@@ -63,7 +63,8 @@ class RecipesForSubscriptionsSerializer(serializers.ModelSerializer):
 class FollowSerializer(CastomUserSerializer):
     """Сериализатор для работы с подписками."""
 
-    recipes = RecipesForSubscriptionsSerializer(many=True, read_only=True)
+    # recipes = RecipesForSubscriptionsSerializer(many=True, read_only=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CastomUserSerializer.Meta):
@@ -71,10 +72,13 @@ class FollowSerializer(CastomUserSerializer):
         fields = CastomUserSerializer.Meta.fields + (
             'recipes', 'recipes_count'
         )
-        read_only_fields = ('email', 'username')
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
+    
+    def get_recipes(self, obj):
+        return Recipe.objects.filter(author=obj).all()
 
     def validate(self, data):
         author = self.instance
@@ -131,7 +135,7 @@ class IngredientsInRecipeSerializer(serializers.ModelSerializer):
 class IngredientGetSerializer(serializers.ModelSerializer):
     """Сериализатор ингредиентов для получения рецепта."""
 
-    id = serializers.IntegerField(source='ingredient.id', read_only=True)
+    id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(source='ingredient.name', read_only=True)
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit',
@@ -143,23 +147,13 @@ class IngredientGetSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-# class RecipeShortSerializer(serializers.ModelSerializer):
-#     """Сериализатор с краткой информацией о рецепте."""
-
-#     class Meta:
-#         model = Recipe
-#         fields = ('id', 'name', 'image', 'cooking_time')
-
-
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор для получения рецепта или списка рецептов."""
 
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
-    )
+    tags = TagSerializer(many=True, read_only=True)
     author = CastomUserSerializer(read_only=True)
-    ingredients = IngredientsInRecipeSerializer(
-        many=True, read_only=True, source='ingredientsinrecipe'
+    ingredients = IngredientGetSerializer(
+        many=True, source='recipe'
     )
     image = Base64ImageField(required=False)
     is_favorited = serializers.SerializerMethodField()

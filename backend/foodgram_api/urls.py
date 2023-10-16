@@ -17,16 +17,13 @@ router_v1.register('users', CastomUserViewSet, basename='users')
 router_v1.register(
     r'users/subscriptions',
     SubscriptionUserViewSet,
-    basename='subscriptions')
-router_v1.register(
-    r'users/(?P<id>\d+)/subscribe',
-    SubscriptionUserViewSet,
-    basename='subscribe')
+    basename='subscriptions'
+)
 # router_v1.register(
-#     r'users/me',
+#     r'users/(?P<id>\d+)/subscribe',
 #     SubscriptionUserViewSet,
-#     basename='me')
-
+#     basename='subscribe'
+# )
 router_v1.register('ingredients', IngredientViewSet, basename='ingredients')
 router_v1.register('tags', TagViewSet, basename='tags')
 router_v1.register('recipes', RecipeViewSet, basename='recipes')
@@ -47,12 +44,12 @@ router_v1.register(
 )
 
 urlpatterns = [
-    # path(
-    #     'users/<int:id>/subscribe/',
-    #     SubscriptionUserViewSet.as_view({'post': 'create'}),
-    #     name='subscribe'
-    # ),
+    path(
+        'users/<int:id>/subscribe/',
+        SubscriptionUserViewSet.as_view({'post': 'create'}),
+        name='subscribe'
+    ),
     path('', include(router_v1.urls)),
-    path('', include('djoser.urls')),
+    # path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 ]

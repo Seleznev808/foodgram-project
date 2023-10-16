@@ -40,16 +40,6 @@ class CastomUserViewSet(UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CastomUserSerializer
-    # @action(
-    #     methods=('GET',),
-    #     detail=False,
-    #     url_path='me',
-    #     permission_classes=(IsAuthenticated,)
-    # )
-    # def me(self, request):
-    #     user = request.user
-    #     serializer = CastomUserSerializer(user)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SubscriptionUserViewSet(
@@ -65,7 +55,7 @@ class SubscriptionUserViewSet(
     """
 
     serializer_class = FollowSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
     def get_queryset(self):
         return User.objects.filter(following__user=self.request.user)
@@ -82,15 +72,10 @@ class SubscriptionUserViewSet(
         )
         serializer.is_valid(raise_exception=True)
         Follow.objects.create(user=user, author=author)
-        # serializer = self.get_serializer(author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         user, author = self.get_user_and_author(request, id)
-        # subscription = Follow.objects.filter(user=user, author=author)
-        # if not subscription:
-        #     return Response(status=status.HTTP_400_BAD_REQUEST)
-        # self.perform_destroy(subscription)
         subscription = get_object_or_404(
             Follow, user=user, author=author
         )
@@ -144,11 +129,13 @@ class FavouritesViewSet(
 ):
     """Добавление и удаление рецепта из избранного."""
 
-    permission_classes = (IsAuthorOrAdmin,)
+    permission_classes = (IsAuthenticated,)
     # permission_classes = (IsAuthenticated,)
 
     def create(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
+        if not recipe:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = FavouritesSerializer(
             data={'user': request.user.id, 'recipe': recipe.id, },
             context={"request": request}
@@ -173,11 +160,13 @@ class ShoppingCartViewSet(
 ):
     """Добавление и удаление рецепта из списка покупок."""
 
-    permission_classes = (IsAuthorOrAdmin,)
+    permission_classes = (IsAuthenticated,)
     # permission_classes = (IsAuthenticated,)
 
     def create(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
+        if not recipe:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = ShoppingCartSerializer(
             data={'user': request.user.id, 'recipe': recipe.id, },
             context={"request": request}
@@ -196,7 +185,7 @@ class ShoppingCartViewSet(
     @action(
         detail=False,
         methods=('GET',),
-        permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthorOrAdmin,)
     )
     def download_shopping_cart(self, request):
         ingredients = IngredientsInRecipe.objects.filter(

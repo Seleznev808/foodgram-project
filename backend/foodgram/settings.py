@@ -152,15 +152,15 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        # 'user_list': 'foodgram_api.serializers.CastomUserSerializer',
+        'user_list': 'foodgram_api.serializers.CastomUserSerializer',
         'user_create': 'foodgram_api.serializers.CreateUserSerializer',
         'user': 'foodgram_api.serializers.CastomUserSerializer',
         'current_user': 'foodgram_api.serializers.CastomUserSerializer',
     },
     'PERMISSIONS': {
-        # 'recipe_list': ['rest_framework.permissions.AllowAny'],
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
-        # 'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
+        'recipe_list': ['foodgram_api.permissions.IsAuthorOrAdminOrReadOnly'],
+        'recipe': ['foodgram_api.permissions.IsAuthorOrAdminOrReadOnly'],
+        'user': ['rest_framework.permissions.AllowAny'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }

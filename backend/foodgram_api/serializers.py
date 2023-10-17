@@ -1,18 +1,11 @@
 import base64
-from django.db.models import F
-from django.core.files.base import ContentFile
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, validators
 
-from recipes.models import (
-    Favourites,
-    Ingredient,
-    IngredientsInRecipe,
-    Recipe,
-    ShoppingCart,
-    Tag
-)
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import (Favourites, Ingredient, IngredientsInRecipe,
+                            Recipe, ShoppingCart, Tag)
+from rest_framework import serializers, validators
 from users.models import Follow, User
 
 
@@ -33,11 +26,11 @@ class CastomUserSerializer(UserSerializer):
         if user.is_anonymous:
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
-    
+
 
 class CreateUserSerializer(UserCreateSerializer):
     """Сериализатор для регистрации пользователя."""
-    
+
     class Meta:
         model = User
         fields = (
@@ -51,9 +44,7 @@ class RecipesForSubscriptionsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
-            'id', 'name', 'image', 'cooking_time'
-        )
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class FollowSerializer(CastomUserSerializer):
@@ -71,14 +62,18 @@ class FollowSerializer(CastomUserSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
-    
+
     def get_recipes(self, obj):
-        recipes_limit = self.context.get('request').query_params.get('recipes_limit')
+        recipes_limit = self.context.get(
+            'request').query_params.get('recipes_limit')
         if recipes_limit:
-            queryset = Recipe.objects.filter(author=obj.id)[:int(recipes_limit)]
+            queryset = Recipe.objects.filter(
+                author=obj.id)[:int(recipes_limit)]
         else:
             queryset = Recipe.objects.filter(author=obj.id).all()
-        serializer = RecipesForSubscriptionsSerializer(instance=queryset, many=True)
+        serializer = RecipesForSubscriptionsSerializer(
+            instance=queryset, many=True
+        )
         return serializer.data
 
     def validate(self, data):
@@ -97,7 +92,7 @@ class FollowSerializer(CastomUserSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с ингредиентами."""
-    
+
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -105,7 +100,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с тегами."""
-    
+
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
@@ -281,14 +276,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context={'request': request}
         ).data
 
-
-# class FavouritesSerializer(serializers.ModelSerializer):
-#     """Сериализатор для создания или изменения избранных рецептов."""
-
-#     class Meta:
-#         model = Recipe
-#         fields = ('id', 'name', 'image', 'cooking_time')
-#         # read_only_fields = ('email', 'username')
 
 class FavouritesSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления или удаления избранных рецептов."""

@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from users.models import User
 
 from .constants import MINIMUM_AMOUNT_OF_INGREDIENTS, MINIMUM_COOKING_TIME
-from users.models import User
 
 
 class Ingredient(models.Model):
@@ -142,6 +142,7 @@ class Favourites(models.Model):
         related_name='favorite_recipe',
         verbose_name='Избранный рецепт'
     )
+
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
@@ -169,6 +170,7 @@ class ShoppingCart(models.Model):
         related_name='shopping_cart',
         verbose_name='Список покупок'
     )
+
     class Meta:
         verbose_name = 'Рецепт с списке покупок'
         verbose_name_plural = 'Рецепты в списке покупок'

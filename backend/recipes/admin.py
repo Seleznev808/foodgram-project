@@ -38,7 +38,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def number_in_favorites(self, obj):
         return obj.favorite_recipe.count()
-    
+
     number_in_favorites.short_description = 'В избранном'
 
 

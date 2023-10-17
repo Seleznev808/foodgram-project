@@ -44,7 +44,6 @@ class CreateUserSerializer(UserCreateSerializer):
             'email', 'id', 'username',
             'first_name', 'last_name', 'password'
         )
-        # read_only_fields = ('id',)
 
 
 class RecipesForSubscriptionsSerializer(serializers.ModelSerializer):
@@ -55,15 +54,11 @@ class RecipesForSubscriptionsSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'image', 'cooking_time'
         )
-        read_only_fields = (
-            'id', 'name', 'image', 'cooking_time'
-        )
 
 
 class FollowSerializer(CastomUserSerializer):
     """Сериализатор для работы с подписками."""
 
-    # recipes = RecipesForSubscriptionsSerializer(many=True, read_only=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -78,7 +73,13 @@ class FollowSerializer(CastomUserSerializer):
         return Recipe.objects.filter(author=obj).count()
     
     def get_recipes(self, obj):
-        return Recipe.objects.filter(author=obj).all()
+        recipes_limit = self.context.get('request').query_params.get('recipes_limit')
+        if recipes_limit:
+            queryset = Recipe.objects.filter(author=obj.id)[:int(recipes_limit)]
+        else:
+            queryset = Recipe.objects.filter(author=obj.id).all()
+        serializer = RecipesForSubscriptionsSerializer(instance=queryset, many=True)
+        return serializer.data
 
     def validate(self, data):
         author = self.instance

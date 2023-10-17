@@ -160,7 +160,7 @@ DJOSER = {
     'PERMISSIONS': {
         'recipe_list': ['foodgram_api.permissions.IsAuthorOrAdminOrReadOnly'],
         'recipe': ['foodgram_api.permissions.IsAuthorOrAdminOrReadOnly'],
-        'user': ['rest_framework.permissions.AllowAny'],
-        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
+        'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
     },
 }

@@ -1,7 +1,10 @@
 from django.db.models import Sum
+from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from djoser.views import UserViewSet
+
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -41,6 +44,16 @@ class CastomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CastomUserSerializer
 
+    # @action(
+    #     methods=('GET',),
+    #     detail=True,
+    #     url_path='me',
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def get_user_info(self, request):
+    #     serializer = CastomUserSerializer(self.request.user)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class SubscriptionUserViewSet(
     mixins.CreateModelMixin,
@@ -58,15 +71,15 @@ class SubscriptionUserViewSet(
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
     def get_queryset(self):
-        return User.objects.filter(following__user=self.request.user)
-    
-    def get_user_and_author(self, request, id):
-        user = self.request.user
-        author = get_object_or_404(User, pk=id)
-        return user, author
+        queryset = User.objects.filter(following__user=self.request.user)
+        limit = self.request.query_params.get('limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+        return queryset
 
     def create(self, request, id):
-        user, author = self.get_user_and_author(request, id)
+        user = self.request.user
+        author = get_object_or_404(User, pk=id)
         serializer = FollowSerializer(
             author, data=request.data, context={"request": request}
         )
@@ -75,7 +88,8 @@ class SubscriptionUserViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
-        user, author = self.get_user_and_author(request, id)
+        user = self.request.user
+        author = get_object_or_404(User, pk=id)
         subscription = get_object_or_404(
             Follow, user=user, author=author
         )
@@ -113,7 +127,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
-    filter_class = RecipeFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
@@ -130,8 +145,7 @@ class FavouritesViewSet(
     """Добавление и удаление рецепта из избранного."""
 
     permission_classes = (IsAuthenticated,)
-    # permission_classes = (IsAuthenticated,)
-
+    
     def create(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
         if not recipe:

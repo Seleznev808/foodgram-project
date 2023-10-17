@@ -170,6 +170,6 @@ def download_shopping_cart(request):
         f' - {ingredient["ingredient_amount"]}'
         for ingredient in ingredients
     ])
-    response = HttpResponse(shopping_list, content_type='application/txt')
+    response = HttpResponse(shopping_list, content_type='text.txt')
     response['Content-Disposition'] = 'attachment; filename="shopping_cart"'
     return response

@@ -10,7 +10,6 @@ class IngredientAdmin(admin.ModelAdmin):
         'measurement_unit'
     )
     search_fields = ('name',)
-    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 

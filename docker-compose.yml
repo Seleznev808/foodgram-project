@@ -30,7 +30,7 @@ services:
     volumes:
       - static:/usr/share/nginx/html/
       - backend_static:/backend_static
-      - backend_media:/backend_media
+      - backend_media:/app/media
       - ../docs/:/usr/share/nginx/html/api/docs/
     ports:
       - 8081:80

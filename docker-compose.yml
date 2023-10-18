@@ -14,23 +14,23 @@ services:
       - postgres_data:/var/lib/postgresql/data/
 
   backend:
-    image: seleznev808/foodgram2_backend
+    build: ./backend/
     env_file: .env
     volumes:
       - backend_static:/app/static
       - backend_media:/app/media
 
   frontend:
-    image: seleznev808/foodgram2_frontend
+    build: ./frontend/
     volumes:
       - static:/app/result_build/build
 
   gateway:
-    image: seleznev808/foodgram2_gateway
+    build: ./nginx/
     volumes:
       - static:/usr/share/nginx/html/
       - backend_static:/backend_static
-      - backend_media:/app/media
+      - backend_media:/backend_media
       - ../docs/:/usr/share/nginx/html/api/docs/
     ports:
       - 8081:80

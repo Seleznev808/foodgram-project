@@ -84,7 +84,7 @@ jobs:
         with:
           context: ./nginx/
           push: true
-          tags: seleznev808/foodgram2_frontend:latest
+          tags: seleznev808/foodgram2_gateway:latest
 
   deploy:
     runs-on: ubuntu-latest

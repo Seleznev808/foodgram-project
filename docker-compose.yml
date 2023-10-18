@@ -33,4 +33,4 @@ services:
       - backend_media:/backend_media
       - ../docs/:/usr/share/nginx/html/api/docs/
     ports:
-      - 8080:80
+      - 8081:80

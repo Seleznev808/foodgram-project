@@ -42,7 +42,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: seleznev808/foodgram_backend:latest
+          tags: seleznev808/foodgram2_backend:latest
 
   build_frontend_and_push_to_docker_hub:
     if: github.ref == 'refs/heads/master'
@@ -63,7 +63,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: seleznev808/foodgram_frontend:latest
+          tags: seleznev808/foodgram2_frontend:latest
 
   build_gateway_and_push_to_docker_hub:
     if: github.ref == 'refs/heads/master'
@@ -84,7 +84,7 @@ jobs:
         with:
           context: ./nginx/
           push: true
-          tags: seleznev808/kittygram_gateway:latest
+          tags: seleznev808/foodgram2_frontend:latest
 
   deploy:
     runs-on: ubuntu-latest

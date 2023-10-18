@@ -8,6 +8,8 @@ from recipes.models import (Favourites, Ingredient, IngredientsInRecipe,
 from rest_framework import serializers, validators
 from users.models import Follow, User
 
+from .utils import ingredient_valid, tag_valid
+
 
 class CastomUserSerializer(UserSerializer):
     """Сериализатор для получения информации о пользователях."""
@@ -194,40 +196,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if not data.get('recipe'):
-            raise serializers.ValidationError(
-                'Добавьте хотя бы один ингредиент!'
-            )
-        ingredients_list = []
-        for ingredient in data.get('recipe'):
-            if ingredient.get('amount') < 1:
-                raise serializers.ValidationError(
-                    'Количество ингредиентов не может быть меньше 1!'
-                )
-            if not Ingredient.objects.filter(id=ingredient.get('id')).exists():
-                raise serializers.ValidationError(
-                    'Выбран несуществующий ингредиент!'
-                )
-            ingredients_list.append(ingredient.get('id'))
-        if len(set(ingredients_list)) != len(ingredients_list):
-            raise serializers.ValidationError(
-                'Ингредиенты не могут повторяться!'
-            )
-        if not data.get('tags'):
-            raise serializers.ValidationError(
-                'Добавьте хотя бы один тег!'
-            )
-        tags_list = []
-        for tag in data.get('tags'):
-            if tag in tags_list:
-                raise serializers.ValidationError(
-                    'Теги не могут повторяться!'
-                )
-            if not Tag.objects.filter(id=tag.id).exists():
-                raise serializers.ValidationError(
-                    'Выбран несуществующий тег!'
-                )
-            tags_list.append(tag)
+        ingredient_valid(serializers, data, Ingredient)
+        tag_valid(serializers, data, Tag)
         if int(data.get('cooking_time')) < 1:
             raise serializers.ValidationError(
                 'Время приготовления не может быть меньше одной минуты!'

@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
+from rest_framework import serializers, validators
+
 from recipes.models import (Favourites, Ingredient, IngredientsInRecipe,
                             Recipe, ShoppingCart, Tag)
-from rest_framework import serializers, validators
 from users.models import Follow, User
 
 from .utils import Base64ImageField, ingredient_valid, tag_valid

@@ -1,14 +1,11 @@
-import base64
-
-from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserSerializer
 from recipes.models import (Favourites, Ingredient, IngredientsInRecipe,
                             Recipe, ShoppingCart, Tag)
 from rest_framework import serializers, validators
 from users.models import Follow, User
 
-from .utils import ingredient_valid, tag_valid
+from .utils import Base64ImageField, ingredient_valid, tag_valid
 
 
 class CastomUserSerializer(UserSerializer):
@@ -28,17 +25,6 @@ class CastomUserSerializer(UserSerializer):
         if user.is_anonymous:
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
-
-
-class CreateUserSerializer(UserCreateSerializer):
-    """Сериализатор для регистрации пользователя."""
-
-    class Meta:
-        model = User
-        fields = (
-            'email', 'id', 'username',
-            'first_name', 'last_name', 'password'
-        )
 
 
 class RecipesForSubscriptionsSerializer(serializers.ModelSerializer):
@@ -106,17 +92,6 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
-
-
-class Base64ImageField(serializers.ImageField):
-    """Сериализатор для сохранения картинок."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
 
 
 class IngredientsInRecipeSerializer(serializers.ModelSerializer):

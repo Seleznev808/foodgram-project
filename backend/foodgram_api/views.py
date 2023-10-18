@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from users.models import Follow, User
 
 from .filters import IngredientFilter, RecipeFilter
-from .permissions import IsAuthorOrAdmin, IsAuthorOrAdminOrReadOnly
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (CastomUserSerializer, FavouritesSerializer,
                           FollowSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
@@ -21,11 +21,10 @@ from .utils import create_instans, delete_instans
 
 
 class CastomUserViewSet(UserViewSet):
-    """Создание нового пользователя;
-    получение:
-        списка пользователей,
-        профиля пользователя,
-        текущего пользователя.
+    """Создание нового пользователя.
+
+    Получение: списка пользователей,
+    профиля пользователя, текущего пользователя.
     """
 
     queryset = User.objects.all()
@@ -36,7 +35,6 @@ class CastomUserViewSet(UserViewSet):
 @permission_classes([IsAuthenticated])
 def users_me(request):
     """Просмотр своего профиля."""
-
     user = get_object_or_404(User, username=request.user)
     serializer = CastomUserSerializer(
         user, context={'request': request}
@@ -50,17 +48,17 @@ class SubscriptionUserViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet
 ):
-    """Работа с подписками:
-        получение списка пользователей,
-            на которых подписан текущий пользователь,
-        подписаться на пользователя,
-        отписаться от пользователя.
+    """Работа с подписками.
+
+    Получение списка пользователей, на которых подписан текущий пользователь,
+    подписаться на пользователя, отписаться от пользователя.
     """
 
     serializer_class = FollowSerializer
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def get_queryset(self):
+        """Возвращает queryset в зависимости от значения параметра limit."""
         queryset = User.objects.filter(following__user=self.request.user)
         limit = self.request.query_params.get('limit')
         if limit:
@@ -68,6 +66,7 @@ class SubscriptionUserViewSet(
         return queryset
 
     def create(self, request, id):
+        """Создание новой подписки."""
         author = get_object_or_404(User, pk=id)
         serializer = FollowSerializer(
             author, data=request.data, context={"request": request}
@@ -77,6 +76,7 @@ class SubscriptionUserViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
+        """Удаление подписки."""
         if not Follow.objects.filter(
             user=request.user, author=get_object_or_404(User, id=id)
         ).exists():
@@ -106,18 +106,20 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Работа с рецептами:
-        получение одного рецепта или списка рецептов,
-        создание и обновление рецептов.
+    """Работа с рецептами.
+
+    Получение одного рецепта или списка рецептов,
+    создание и обновление рецептов.
     """
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
+        """Возвращает queryset в зависимости от метода."""
         if self.request.method == 'GET':
             return RecipeReadSerializer
         return RecipeCreateSerializer
@@ -130,12 +132,14 @@ class FavouritesViewSet(
 ):
     """Добавление и удаление рецепта из избранного."""
 
-    permission_classes = (IsAuthorOrAdmin,)
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, id):
+        """Добавляет рецепт в избранное."""
         return create_instans(request, id, FavouritesSerializer, Recipe)
 
     def delete(self, request, id):
+        """Удаляет рецепт из избранного."""
         return delete_instans(request, id, Recipe, Favourites)
 
 
@@ -149,17 +153,20 @@ class ShoppingCartViewSet(
     permission_classes = (IsAuthenticated,)
 
     def create(self, request, id):
+        """Добавляет рецепт в список покупок."""
         return create_instans(request, id, ShoppingCartSerializer, Recipe)
 
     def delete(self, request, id):
+        """Удаляет рецепт из списка покупок."""
         return delete_instans(request, id, Recipe, ShoppingCart)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def download_shopping_cart(request):
+    """Скачивание списка покупок."""
     ingredients = IngredientsInRecipe.objects.filter(
-        recipe__shopping_cart__user=request.user
+        recipe__shoppingcart_recipe__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
     ).annotate(ingredient_amount=Sum('amount'))

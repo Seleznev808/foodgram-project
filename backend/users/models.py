@@ -4,6 +4,8 @@ from django.db import models
 
 
 class User(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     username_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
@@ -59,8 +61,12 @@ class Follow(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'author'),
-                name='Вы не можете подписаться на себя!'
+                name='Вы уже подписаны!'
             ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('author')),
+                name='Вы не можете подписаться на себя!',
+            )
         )
 
     def __str__(self):

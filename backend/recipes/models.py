@@ -1,18 +1,27 @@
-from django.core.validators import MinValueValidator
+from colorfield.fields import ColorField
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator)
 from django.db import models
 from users.models import User
 
-from .constants import MINIMUM_AMOUNT_OF_INGREDIENTS, MINIMUM_COOKING_TIME
+from .constants import (
+    MEASUREMENT_UNIT_MAX_LENGTH,
+    MAX_COOKING_TIME,
+    MINIMUM_AMOUNT_OF_INGREDIENTS,
+    MINIMUM_COOKING_TIME,
+    NAME_MAX_LENGTH,
+    SLUG_MAX_LENGTH
+)
 
 
 class Ingredient(models.Model):
     name = models.CharField(
         'Ингредиент',
-        max_length=200
+        max_length=NAME_MAX_LENGTH
     )
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=200
+        max_length=MEASUREMENT_UNIT_MAX_LENGTH
     )
 
     class Meta:
@@ -27,17 +36,17 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     name = models.CharField(
         'Тег',
-        max_length=200,
+        max_length=NAME_MAX_LENGTH,
         unique=True
     )
-    color = models.CharField(
-        'Цвет',
-        max_length=7,
+    color = ColorField(
+        default='#FF0000',
+        image_field='Цвет',
         unique=True
     )
     slug = models.SlugField(
         'Слаг',
-        max_length=200,
+        max_length=SLUG_MAX_LENGTH,
         unique=True
     )
 
@@ -59,7 +68,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         'Название рецепта',
-        max_length=200
+        max_length=NAME_MAX_LENGTH
     )
     image = models.ImageField(
         'Картинка рецепта',
@@ -79,13 +88,17 @@ class Recipe(models.Model):
         related_name='tags',
         verbose_name='Теги'
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
         validators=(
             MinValueValidator(
                 MINIMUM_COOKING_TIME,
                 message='Время притовления не может быть меньше одной минуты!'
             ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                message='Слишком большое время приготовления!'
+            )
         )
     )
 
@@ -111,7 +124,7 @@ class IngredientsInRecipe(models.Model):
         related_name='ingredient',
         verbose_name='Ингредиент'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         'Количество ингредиентов',
         validators=(
             MinValueValidator(
@@ -129,19 +142,23 @@ class IngredientsInRecipe(models.Model):
         return f'{self.ingredient.name} для рецепта {self.recipe.name}'
 
 
-class Favourites(models.Model):
+class EnumRecipes(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite_recipe',
-        verbose_name='Пользователь'
+        related_name='%(class)s_recipe'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorite_recipe',
-        verbose_name='Избранный рецепт'
+        related_name='%(class)s_recipe'
     )
+
+    class Meta:
+        abstract = True
+
+
+class Favourites(EnumRecipes):
 
     class Meta:
         verbose_name = 'Избранное'
@@ -157,19 +174,7 @@ class Favourites(models.Model):
         return f'{self.recipe.name} - избранный рецепт {self.user.username}'
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Покупатель'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Список покупок'
-    )
+class ShoppingCart(EnumRecipes):
 
     class Meta:
         verbose_name = 'Рецепт с списке покупок'

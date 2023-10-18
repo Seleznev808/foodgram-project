@@ -92,3 +92,33 @@ git push
 ```
 Деплой успешно выполнен!
 ```
+
+После деплоя необходимо подключиться к удаленному серверу, перейти в директорию foodgram/ и добавить ингредиенты для рецептов в базу:
+
+```
+sudo docker compose -f docker-compose.yml exec backend python manage.py loaddata db.json
+```
+
+При необходимости вы можете сделать свой дамп базы данных - скрипт для внесения данных в базу из csv файла лежит в папке data. После заполнения базы выполните:
+
+```
+python -Xutf8 manage.py dumpdata recipes.ingredient recipes.tag --indent 2 > db.json
+```
+
+это создаст дамп таблиц ingredient и tag из приложения recipes
+
+## Технологии
+
+```
+Django 3.2.16
+Django REST framework 3.14
+Djoser 2.2
+PostgreSQL
+Docker
+Nginx
+React
+```
+
+## Автор
+
+[Селезнев Василий](https://github.com/Seleznev808/)

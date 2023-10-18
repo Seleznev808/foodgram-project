@@ -26,9 +26,8 @@ services:
       - static:/app/result_build/build
 
   gateway:
-    image: nginx:1.19.3
+    image: seleznev808/foodgram_gateway
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - static:/usr/share/nginx/html/
       - backend_static:/backend_static
       - backend_media:/backend_media

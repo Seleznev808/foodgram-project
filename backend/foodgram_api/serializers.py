@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
-from rest_framework import serializers, validators
+from rest_framework import serializers, status, validators
 
 from recipes.models import (Favourites, Ingredient, IngredientsInRecipe,
                             Recipe, ShoppingCart, Tag)
@@ -198,6 +198,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get('request').user
+        if user.is_anonymous:
+            result = serializers.ValidationError(
+                {'message': 'Вы не можете создать рецепт!'}
+            )
+            result.status_code = status.HTTP_401_UNAUTHORIZED
+            raise result
         ingredients = validated_data.pop('recipe')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=user, **validated_data)

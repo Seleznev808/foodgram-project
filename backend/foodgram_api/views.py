@@ -56,7 +56,7 @@ class SubscriptionUserViewSet(
     """
 
     serializer_class = FollowSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly, IsAuthenticated)
 
     def get_queryset(self):
         """Возвращает queryset в зависимости от значения параметра limit."""
@@ -93,7 +93,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (AllowAny,)
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
 
 

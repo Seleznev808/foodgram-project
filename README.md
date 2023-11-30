@@ -41,6 +41,8 @@ ALLOWED_HOSTS='127.0.0.1 localhost'
 
 ### Установка и настройка Nginx
 
+---
+
 Установите Nginx:
 
 ```

@@ -39,7 +39,32 @@ DEBUG=False
 ALLOWED_HOSTS='127.0.0.1 localhost'
 ```
 
-Установите Nginx - [инструкция](https://github.com/Seleznev808/infra_sprint1)
+#### Установка и настройка Nginx
+
+Установите Nginx:
+
+```
+sudo apt install nginx -y
+```
+
+После чего запустите его:
+
+```
+sudo systemctl start nginx
+```
+
+Укажите файрволу, какие порты должны остаться открытыми:
+
+```
+sudo ufw allow 'Nginx Full'
+sudo ufw allow OpenSSH
+```
+
+Включите файрвол:
+
+```
+sudo ufw enable
+```
 
 В файле конфигурации Nginx пропишите:
 
@@ -54,12 +79,53 @@ server {
 }
 ```
 
-Получите и настройте SSL-сертификат - [инструкция](https://github.com/Seleznev808/infra_sprint1)
+#### Получение и настройка SSL-сертификата
+
+Установите пакетный менеджер snap:
+
+```
+sudo apt install snapd
+```
+
+Установите и обновите зависимости для snap:
+
+```
+sudo snap install core; sudo snap refresh core
+```
+
+Установите пакет certbot:
+
+```
+sudo snap install --classic certbo
+
+```
+
+Создайте ссылку на certbot в системной директории:
+
+```
+sudo ln -s /snap/bin/certbot /usr/bin/certbo
+```
+
+Для получения SSL-сертификата выполните:
+
+```
+sudo certbot --nginx
+```
+
+Проверьте, что сертификат будет обновляться автоматически:
+
+```
+sudo certbot renew --dry-run
+```
+
+Если не выведется ошибка, значит, всё в порядке
+
+#### Деплой на удаленный сервер
 
 В файле main.yml директории .github/workflows/ измените название образов
 
 ```
-seleznev808/kittygram_gateway:latest → ваш_логин_DockerHub/kittygram_gateway:latest
+seleznev808/kittygram_gateway:latest → ваш_логин_DockerHub/foodgram2_backend:latest
 ```
 
 Для деплоя на сервер достаточно запушить коммит на GitHub:
@@ -96,15 +162,13 @@ python -Xutf8 manage.py dumpdata recipes.ingredient recipes.tag --indent 2 > db.
 
 ## Технологии
 
-```
-Django 3.2.16
-Django REST framework 3.14
-Djoser 2.2
-PostgreSQL
-Docker
-Nginx
-React
-```
+* Django 3.2.16
+* Django REST framework 3.14
+* Djoser 2.2
+* PostgreSQL
+* Docker
+* Nginx
+* React
 
 ## Автор
 

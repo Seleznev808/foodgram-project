@@ -66,7 +66,13 @@ sudo ufw allow OpenSSH
 sudo ufw enable
 ```
 
-В файле конфигурации Nginx пропишите:
+Откройте файл конфигурации Nginx 
+
+```
+sudo nano /etc/nginx/sites-enabled/default
+```
+
+и пропишите:
 
 ```
 server {

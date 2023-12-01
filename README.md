@@ -8,7 +8,13 @@
 
 Для запуска проекта на удаленном сервере используется workflow для GitHub Actions
 
-Форкните данный репозиторий, перейдите в настройки репозитория — Settings, выберите на панели слева Secrets and Variables → Actions
+Клонируйте данный репозиторий
+
+```
+git clone git@github.com:Seleznev808/foodgram-project.git
+```
+
+перейдите в настройки репозитория — Settings, выберите на панели слева Secrets and Variables → Actions
 
 Необходимо создать переменные:
 

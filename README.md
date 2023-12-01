@@ -8,7 +8,7 @@
 
 Для запуска проекта на удаленном сервере используется workflow для GitHub Actions
 
-Клонируйте данный репозиторий
+Клонируйте данный репозиторий:
 
 ```
 git clone git@github.com:Seleznev808/foodgram-project.git
